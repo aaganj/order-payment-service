@@ -5,14 +5,19 @@ import com.ecom.order_service.entity.Order;
 import com.ecom.order_service.entity.OrderStatus;
 import com.ecom.order_service.entity.OutboxEvent;
 import com.ecom.order_service.event.OrderCreatedEvent;
+import com.ecom.order_service.exception.OrderNotFoundException;
 import com.ecom.order_service.repository.OrderRepository;
 import com.ecom.order_service.repository.OutBoxEventRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Or;
+import org.hibernate.ObjectNotFoundException;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,15 +28,15 @@ public class OrderService {
     private final ObjectMapper objectMapper;
 
     public OrderService(OrderRepository orderRepository
-            ,OutBoxEventRepository outBoxEventRepository,
+            , OutBoxEventRepository outBoxEventRepository,
                         ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
-        this.outBoxEventRepository=outBoxEventRepository;
+        this.outBoxEventRepository = outBoxEventRepository;
         this.objectMapper = objectMapper;
     }
 
     @Transactional
-    public Order createOrder(CreateOrderRequest orderRequest){
+    public Order createOrder(CreateOrderRequest orderRequest) {
         Order order = new Order();
         order.setCustomerId(orderRequest.getCustomerId());
         order.setAmount(orderRequest.getAmount());
@@ -66,5 +71,33 @@ public class OrderService {
 
         outBoxEventRepository.save(event);
         return savedOrder;
+    }
+
+    public Order getOrder(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(
+                                "Order Id " + orderId + " not found"));
+    }
+
+    @Transactional
+    public Order cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(
+                                "Order Id " + orderId + " not found"));
+
+        order.setStatus(OrderStatus.CANCELLED);
+        return orderRepository.save(order);
+    }
+
+    public OrderStatus getOrderStatus(Long orderId) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() ->
+                        new OrderNotFoundException(
+                                "Order Id " + orderId + " not found"));
+
+        return order.getStatus();
     }
 }
