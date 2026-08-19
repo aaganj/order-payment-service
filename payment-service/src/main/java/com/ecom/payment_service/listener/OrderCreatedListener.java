@@ -24,6 +24,12 @@ public class OrderCreatedListener {
                     objectMapper.readValue(message,OrderCreatedEvent.class);
             paymentService.processOrderCreated(event);
 
+//            System.out.println(
+//                  "Payment service is down  ,sleeping for 20 seconds"
+//            );
+//
+//           Thread.sleep(20000);
+
         }catch (Exception ex){
             System.err.println(
                     "Failed to process OrderCreated: "

@@ -4,8 +4,10 @@ import com.ecom.payment_service.event.OrderCreatedEvent;
 import com.ecom.payment_service.listener.OrderCreatedListener;
 import com.ecom.payment_service.service.PaymentService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class PaymentJmsListenerTest {
     @Mock
     private ObjectMapper objectMapper;
